@@ -27,6 +27,21 @@ Askar Kadyrgulov a.kadyrgulov@innopolis.university
 
 ---
 
+## 📁 Project Structure
+
+```yaml
+├── code
+│   ├── datasets
+│   ├── deployment
+│   │   ├── api
+│   │   └── app
+│   └── models
+├── data
+└── models
+```
+
+---
+
 ## 📂 Datasets
 We plan to use:
 - **CROHME dataset** – Handwritten mathematical expressions.
