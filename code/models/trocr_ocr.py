@@ -1,4 +1,3 @@
-
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from PIL import Image
 import torch
