@@ -1,5 +1,8 @@
 let currentFile = null;
 
+// Get API URL
+const API_BASE_URL = 'http://localhost:8000';
+
 // File input handling
 document.getElementById('fileInput').addEventListener('change', function(e) {
     if (e.target.files.length > 0) {
@@ -55,43 +58,47 @@ async function convert(format) {
         const formData = new FormData();
         formData.append('file', currentFile);
         
-        const response = await fetch(`http://localhost:8000/convert?output_format=${format}`, {
+        // Use query parameter as your backend expects
+        const response = await fetch(`${API_BASE_URL}/convert?output_format=${format}`, {
             method: 'POST',
             body: formData
         });
         
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Conversion failed');
+        }
+        
         const data = await response.json();
         
         if (data.success) {
-            let resultHTML = `
-                <div class="success">
-                    <h3>✅ ${data.message}</h3>
-                    <button onclick="downloadFile('${data.download_url}')">📥 Download ${format.toUpperCase()}</button>
-            `;
-            
-            if (data.text_preview) {
-                resultHTML += `
-                    <div class="preview">
-                        <strong>Text Preview:</strong><br>
-                        ${data.text_preview}
+            if (format === 'pdf') {
+                // Download PDF file
+                const downloadUrl = `${API_BASE_URL}${data.download_url}`;
+                showResult(`
+                    <div class="success">
+                        <h3>✅ ${data.message}</h3>
+                        <button onclick="window.open('${downloadUrl}', '_blank')">📥 Download PDF</button>
                     </div>
-                `;
+                `, 'success');
+            } else if (format === 'text') {
+                // For text extraction (you'll need to implement this in backend)
+                showResult(`
+                    <div class="success">
+                        <h3>✅ ${data.message}</h3>
+                        <p>Text extraction would go here (not implemented in backend yet)</p>
+                    </div>
+                `, 'success');
             }
-            
-            resultHTML += `</div>`;
-            showResult(resultHTML, 'success');
         } else {
             showResult('Conversion failed: ' + data.message, 'error');
         }
     } catch (error) {
         showResult('Error: ' + error.message, 'error');
+        console.error('Error:', error);
     } finally {
         loading.style.display = 'none';
     }
-}
-
-function downloadFile(downloadUrl) {
-    window.open(`http://localhost:8000${downloadUrl}`, '_blank');
 }
 
 function showResult(message, type) {
@@ -104,3 +111,19 @@ function showResult(message, type) {
 function hideResult() {
     document.getElementById('result').style.display = 'none';
 }
+
+// Check backend health
+async function checkHealth() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/health`);
+        if (response.ok) {
+            console.log('Backend is connected');
+        }
+    } catch (error) {
+        console.warn('Backend is not reachable:', error.message);
+        showResult('Warning: Backend server is not reachable', 'error');
+    }
+}
+
+// Check health on page load
+document.addEventListener('DOMContentLoaded', checkHealth);

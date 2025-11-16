@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: api/
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/uploads:/app/data/uploads
+    environment:
+      - FLASK_ENV=development
+    restart: unless-stopped
+
+  app:
+    build:
+      context: app/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  uploads:
