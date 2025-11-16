@@ -4,7 +4,19 @@ import numpy as np
 import random
 from pathlib import Path
 
-FONTS = ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
+WINDOWS_FONT_PATHS = [
+    "C:/Windows/Fonts/arial.ttf",
+    "C:/Windows/Fonts/times.ttf",
+    "C:/Windows/Fonts/cour.ttf",
+    "C:/Windows/Fonts/calibri.ttf"
+]
+
+# Try to find available fonts
+FONTS = []
+for font_path in WINDOWS_FONT_PATHS:
+    if os.path.exists(font_path):
+        FONTS.append(font_path)
+
 SAVE_DIR = Path("data/samples")
 SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
