@@ -22,6 +22,20 @@ def preprocess_save(in_path: str, out_path: str, target_h=64, target_w=256):
     _, th = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     cv2.imwrite(str(out_path), th)
 
+def preprocess_for_model(image_path: str, target_h=64, target_w=256):
+    """
+    Preprocess image for model input.
+    Returns normalized numpy array ready for model.
+    """
+    img = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
+    if img is None:
+        raise ValueError(f"Could not load image: {image_path}")
+    img = resize_and_pad(img, target_h, target_w)
+    _, th = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # Normalize to [0, 1] and invert (black=1, white=0)
+    th = (255 - th) / 255.0
+    return th
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 3:

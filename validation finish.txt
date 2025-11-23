@@ -1,0 +1,100 @@
+================================================================================
+TESTING MODEL ON VALIDATION SET
+================================================================================
+Device: cuda
+CUDA device: NVIDIA GeForce GTX 1080
+
+Loading data from datasets\im2latex_prepared.json...
+✓ Loaded 9320 examples from validation set
+
+Loading vocabulary...
+Loaded vocabulary from models\vocab.json (112 tokens)
+✓ Vocabulary size: 112
+
+
+Available RAM: 19.84 GB
+Estimated RAM for validation preload: 0.58 GB
+✓ Using preload of all images into RAM (fast!)
+
+Creating dataset...
+
+Preloading 9320 images into memory...
+Loading images: 100%|███████████████████████████████████████████| 9320/9320 [04:16<00:00, 36.30it/s]
+✓ Loaded 9320 images into memory (591.60 MB)
+✓ Dataset created, batches: 292
+
+Loading model from models\im2latex_best.pth...
+✓ Model loaded
+✓ Model parameters: 723,952
+
+Starting validation...
+--------------------------------------------------------------------------------
+Validation: 100%|█████████████████████████████████████████████████| 292/292 [00:10<00:00, 28.69it/s]
+
+================================================================================
+VALIDATION RESULTS
+================================================================================
+Average Loss: 1.3162
+Average Accuracy (token-level): 60.11%
+
+================================================================================
+PREDICTION EXAMPLES (first 10 from validation set)
+================================================================================
+
+Example 1 (accuracy: 56.2%):
+  Target LaTeX:  \int_{-\epsilon}^\infty dl\: {\rm e}^{-l\zeta} \int_{-\epsilon}^\infty dl' {\rm e}^{-l'\zeta}  ll'{l'-l \over l+l'} \{3\,\delta''(l) - {3 \over 4}t\,\d...
+  Predicted:     \label{eq:superit}  \left( \begin{array}{ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc...
+  Differences: 254 chars
+
+Example 2 (accuracy: 65.3%):
+  Target LaTeX:  \label{hR=hR+hR+}\hat{R}=d\hat{C} - \hat{C} \wedge \hat{H}_3 = \hat{R}_2 \oplus \hat{R}_4 \oplus \hat{R}_6  \oplus \hat{R}_8  \oplus \hat{R}_{10} \; ,
+  Predicted:     \label{eq:superit}  \left( \begin{array}{ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc...
+  Differences: 248 chars
+
+Example 3 (accuracy: 60.0%):
+  Target LaTeX:  \label{knsflowy}\frac{\partial y(l)}{\partial l} =\left[d-\eta_y - 2\pi^2\tilde{f}(d)K(l) \right] ~ y(l),
+  Predicted:     \label{eq:superithera}  \delta \phi = \partial_{\mu} \phi \partial_{\mu} \phi + \frac{1}{2} \partial_{\mu} \phi - \frac{1}{2} \partial_{\mu} \phi - \f...
+  Differences: 245 chars
+
+Example 4 (accuracy: 56.2%):
+  Target LaTeX:  \begin{array}{ll}\sigma^0=-{\bf 1}_{2\times 2}={\bar\sigma}^0,&\sigma^1=\tau_z=-{\bar\sigma}^1,\\\sigma^2=\tau_x=-{\bar\sigma}^2,&\sigma^{3}=\tau_y=-{...
+  Predicted:     \label{eq:cond}\left( \begin{array}{cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc...
+  Differences: 253 chars
+
+Example 5 (accuracy: 64.0%):
+  Target LaTeX:  \label{seq1} \longrightarrow H^{g+1}(F)  \stackrel{pr}{\longrightarrow} H^g(F_{rel})  \stackrel{\{Q,c_0\}} {\longrightarrow} H^{g+2}(F_{rel})  \stackr...
+  Predicted:     \label{eq:supers}\langle \psi \rangle = \left( \begin{array}{cc}
+                          ...
+  Differences: 236 chars
+
+Example 6 (accuracy: 48.6%):
+  Target LaTeX:  \Lambda_{-1,1}=\lambda^{-1}(e_{1,2p} -e_{2,2p+1}) +(e_{2,1}-e_{2p+1,2p})+2\sum_{k=1}^{p-1} e_{2+k,1+k} -2\sum_{k=1}^{p-1} e_{p+1+k,p+k},\label{T2}
+  Predicted:     \label{eq:superit}  \left( \begin{array}{ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc...
+  Differences: 253 chars
+
+Example 7 (accuracy: 67.9%):
+  Target LaTeX:  S[\phi]=\int d^Dx\,\biggl[   \frac{1}{2}\phi(x)e^{-\Delta}\phi(x)   -\frac{g}{4!}\phi^4(x)\biggr],\label{one}
+  Predicted:     \label{eq:supers}\langle \psi \rangle = \left( \begin{array}{cc}
+                          ...
+  Differences: 249 chars
+
+Example 8 (accuracy: 60.9%):
+  Target LaTeX:  \label{Hammac}H=4\pi T_2 \ \sqrt{R^4+(\frac{N}{2}-\frac{f}{3}R^3)^2},
+  Predicted:     \label{eq:supers}\langle \psi \rangle = \left( \begin{array}{cc}
+                          ...
+  Differences: 246 chars
+
+Example 9 (accuracy: 54.3%):
+  Target LaTeX:  x^{2r}-u_{1}x^{2r-2}-\cdots-u_{2r-1}-x\left(z+{\mu^2\over z}\right)=0.
+  Predicted:     \label{eq:supers}\langle \psi \rangle = \left( \begin{array}{cc}
+                          ...
+  Differences: 253 chars
+
+Example 10 (accuracy: 73.0%):
+  Target LaTeX:  \partial_{x}\phi|_{0}=\frac{\sqrt{2}m}{\beta}\left(\varepsilon_{0}e^{-\frac{\beta}{\sqrt{2}}\phi(0,t)}-\varepsilon_{1}e^{\frac{\beta}{\sqrt{2}}\phi(0,...
+  Predicted:     \label{eq:superit}  \left( \begin{array}{ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc...
+  Differences: 249 chars
+
+================================================================================
+Validation completed!
+================================================================================

@@ -11,10 +11,15 @@ import logging
 import time
 import aiofiles
 import asyncio
+from pathlib import Path
 
-# Add code directory to path for imports
-sys.path.insert(0, '/app')
-from code.models.latex_converter import LatexConverter
+# Define project root directory
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.absolute()
+CODE_DIR = PROJECT_ROOT / "code"
+
+# Import LatexConverter
+# The standard module 'code' is already loaded in run_api.py, so there will be no conflict
+from models.latex_converter import LatexConverter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,13 +30,14 @@ app = FastAPI(title="InstaTexScanner API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://frontend:80"],
+    allow_origins=["http://localhost:3000", "http://localhost:8080", "http://127.0.0.1:3000", "http://127.0.0.1:8080"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-SHARED_DATA_DIR = "/app/shared_data"
+# Use local paths
+SHARED_DATA_DIR = str(PROJECT_ROOT / "shared_data")
 UPLOAD_DIR = os.path.join(SHARED_DATA_DIR, "uploads")
 OUTPUT_DIR = os.path.join(SHARED_DATA_DIR, "outputs")
 
@@ -50,17 +56,20 @@ def get_latex_converter():
     global latex_converter
     if latex_converter is None:
         try:
+            logger.info("Initializing LatexConverter...")
             latex_converter = LatexConverter()
             logger.info("LatexConverter initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize LatexConverter: {e}")
-            raise
+            logger.error(f"Failed to initialize LatexConverter: {e}", exc_info=True)
+            # Do not raise exception so the server can start
+            # Models will be loaded on first request
+            logger.warning("LatexConverter will be initialized on first request")
     return latex_converter
 
 
 @app.get("/")
 async def root():
-    return {"message": "InstaTexScanner API is running!"}
+    return {"message": "InstaTexScanner API is running!", "project_root": str(PROJECT_ROOT)}
 
 @app.get("/health")
 async def health_check():
@@ -97,15 +106,23 @@ async def convert_image(
         # Process based on format
         if output_format in ["latex", "text"]:
             # Use LatexConverter to extract text/LaTeX
-            converter = get_latex_converter()
+            try:
+                converter = get_latex_converter()
+            except Exception as e:
+                logger.error(f"Failed to get converter: {e}")
+                raise HTTPException(500, f"Model initialization failed: {str(e)}")
             
             # Run conversion in thread pool (CPU-intensive)
             def run_conversion():
-                return converter.convert(
-                    input_path, 
-                    out_dir=OUTPUT_DIR,
-                    segment_document=segment_document
-                )
+                try:
+                    return converter.convert(
+                        input_path, 
+                        out_dir=OUTPUT_DIR,
+                        segment_document=segment_document
+                    )
+                except Exception as e:
+                    logger.error(f"Conversion error: {e}", exc_info=True)
+                    raise
             
             result = await asyncio.get_event_loop().run_in_executor(
                 executor, run_conversion
@@ -232,4 +249,5 @@ async def list_files():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+

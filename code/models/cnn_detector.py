@@ -3,6 +3,8 @@ import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 import numpy as np
+import os
+from pathlib import Path
 
 
 class TinyEMNISTDetector:
@@ -12,8 +14,24 @@ class TinyEMNISTDetector:
           printed text triggers low confidence.
     """
 
-    def __init__(self, model_path="models/tiny_cnn_emnist.pth"):
+    def __init__(self, model_path=None):
         from code.models.model_cnn import SimpleCNN  # use your existing class
+
+        # Try to find model in different locations
+        if model_path is None:
+            possible_paths = [
+                "models/tiny_cnn_emnist.pth",
+                "/app/models/tiny_cnn_emnist.pth",
+                os.path.join(os.path.dirname(__file__), "../../models/tiny_cnn_emnist.pth"),
+            ]
+            for path in possible_paths:
+                if os.path.exists(path):
+                    model_path = path
+                    break
+            if model_path is None:
+                raise FileNotFoundError(
+                    f"Model file not found. Tried: {possible_paths}"
+                )
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = SimpleCNN(num_classes=27).to(self.device)

@@ -5,6 +5,15 @@ python-multipart==0.0.6
 pillow==10.1.0
 aiofiles
 
+# ML & Deep Learning
+torch>=1.9.0
+torchvision>=0.10.0
+transformers>=4.20.0
+
+# Image Processing
+numpy>=1.19.0
+opencv-python-headless>=4.5.0
+
 # Development & Quality
 pytest==7.4.3
 black==23.11.0

@@ -1,12 +1,13 @@
 services:
   api:
     build:
-      context: api/
-      dockerfile: Dockerfile
+      context: ../../
+      dockerfile: code/deployment/api/Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ./data/uploads:/app/data/uploads
+      - ../../models:/app/models
+      - ./shared_data:/app/shared_data
     environment:
       - FLASK_ENV=development
     restart: unless-stopped
