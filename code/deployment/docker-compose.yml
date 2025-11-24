@@ -1,16 +1,20 @@
 services:
   api:
     build:
-      context: ../../
-      dockerfile: code/deployment/api/Dockerfile
+      context: /api
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ../../models:/app/models
-      - ./shared_data:/app/shared_data
+      - shared_data:/app/shared_data
     environment:
-      - FLASK_ENV=development
+      - PYTHONPATH=/app
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   app:
     build:
@@ -23,4 +27,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  uploads:
+  shared_data:

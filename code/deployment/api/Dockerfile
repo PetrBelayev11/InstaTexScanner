@@ -1,29 +1,35 @@
 FROM python:3.9-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libgl1 \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+# # Install system dependencies
+# RUN apt-get update && apt-get install -y \
+#     gcc \
+#     g++ \
+#     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
-COPY code/deployment/api/requirements.txt .
+# Copy requirements first for better caching
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY code/deployment/api/main.py .
+# Create directory structure
+RUN mkdir -p /app/converter /app/shared_data/uploads /app/shared_data/outputs
 
-# Copy code directory with models
-COPY code /app/code
+# Copy only necessary Python files
+COPY main.py .
+COPY converter/latex_converter.py converter/
+COPY converter/cnn_detector.py converter/
+COPY converter/document_segmenter.py converter/
+COPY converter/handwriting_classifier.py converter/
+COPY converter/image_detector.py converter/
+COPY converter/model_cnn.py converter/
+COPY converter/trocr_ocr.py converter/
 
-# Copy models directory (if exists)
-COPY models /app/models
+# Copy model files
+COPY converter/models/tiny_cnn_emnist.pth converter/models/
 
-# Create shared data directory
-RUN mkdir -p /app/shared_data/uploads /app/shared_data/outputs
+# Set Python path
+ENV PYTHONPATH=/app
 
 # Expose port
 EXPOSE 8000
