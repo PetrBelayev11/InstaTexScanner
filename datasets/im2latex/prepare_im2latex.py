@@ -1,4 +1,3 @@
-
 # Converts Zenodo Im2LaTeX dataset into trainable JSON format.
 
 import json

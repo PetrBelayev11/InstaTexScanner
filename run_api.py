@@ -41,10 +41,7 @@ if __name__ == "__main__":
     # Temporarily change environment variables
     os.environ["SHARED_DATA_DIR"] = str(shared_data_dir)
     
-    # Import local version of main
-    from deployment.api.main_local import app
-    
-    # Start server
+
     print("🚀 Starting InstaTexScanner API server...")
     print(f"📁 Working directory: {project_root}")
     print("🌐 API available at: http://localhost:8000")
@@ -52,11 +49,10 @@ if __name__ == "__main__":
     print("\nPress Ctrl+C to stop server\n")
     
     uvicorn.run(
-        app,
+        "deployment.api.main_local:app",  # Import string format for reload
         host="0.0.0.0",
         port=8000,
         reload=True,
         reload_dirs=[str(project_root / "code")],
         log_level="info"
     )
-

@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from concurrent.futures import ThreadPoolExecutor
 import os
@@ -14,7 +13,7 @@ import asyncio
 
 # Add code directory to path for imports
 sys.path.insert(0, '/app')
-from code.models.latex_converter import LatexConverter
+from converter.latex_converter import LatexConverter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

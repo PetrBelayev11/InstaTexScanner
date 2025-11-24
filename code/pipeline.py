@@ -2,13 +2,13 @@ import torch
 from pathlib import Path
 import subprocess
 
-from code.models.preprocess import preprocess_for_model
-from code.models.handwriting_classifier import HandwritingClassifier
-from code.models.trocr_ocr import run_trocr
-from code.models.model_im2markup import Im2Latex
-from code.models.inference import greedy_decode
-from code.models.latex_converter import text_to_latex
-from code.vocab import build_vocab
+from models.preprocess import preprocess_for_model
+from models.handwriting_classifier import is_handwritten_heuristic as HandwritingClassifier
+from models.trocr_ocr import run_trocr
+from models.model_im2markup import Im2Latex
+from models.inference import greedy_decode
+from models.latex_converter import LatexConverter as text_to_latex
+from vocab import build_vocab
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 

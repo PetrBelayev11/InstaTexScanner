@@ -82,11 +82,29 @@ async function convert(format) {
                     </div>
                 `, 'success');
             } else if (format === 'text') {
-                // For text extraction (you'll need to implement this in backend)
+                // Handle text extraction response
+                const downloadUrl = `${API_BASE_URL}${data.download_url}`;
                 showResult(`
                     <div class="success">
                         <h3>✅ ${data.message}</h3>
-                        <p>Text extraction would go here (not implemented in backend yet)</p>
+                        <div style="margin: 15px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; max-height: 200px; overflow-y: auto;">
+                            <h4>Extracted Text:</h4>
+                            <pre style="white-space: pre-wrap; font-family: inherit;">${data.text || 'No text extracted'}</pre>
+                        </div>
+                        <button onclick="window.open('${downloadUrl}', '_blank')">📥 Download Text File</button>
+                    </div>
+                `, 'success');
+            } else if (format === 'latex') {
+                // Handle LaTeX response
+                const downloadUrl = `${API_BASE_URL}${data.download_url}`;
+                showResult(`
+                    <div class="success">
+                        <h3>✅ ${data.message}</h3>
+                        <div style="margin: 15px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; max-height: 200px; overflow-y: auto;">
+                            <h4>Extracted LaTeX:</h4>
+                            <pre style="white-space: pre-wrap; font-family: inherit;">${data.latex || 'No LaTeX extracted'}</pre>
+                        </div>
+                        <button onclick="window.open('${downloadUrl}', '_blank')">📥 Download LaTeX File</button>
                     </div>
                 `, 'success');
             }
