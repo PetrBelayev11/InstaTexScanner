@@ -4,6 +4,17 @@ InstaTexScanner is a tool that takes a photo of a document (printed, handwritten
 
 ---
 
+## 📋 Table of Contents
+- [🚀 Project Goal](#-project-goal)
+- [👥 Team](#-team)
+- [🚀 Deployment](#-deployment)
+- [📌 Features](#-features-planned)
+- [📁 Project Structure](#-project-structure)
+- [📂 Datasets](#-datasets)
+- [⚙️ How It Works](#-how-it-works)
+
+---
+
 ## 🚀 Project Goal
 The goal is to make LaTeX document creation faster and easier by automating the process of converting handwritten notes, printed documents, or even blackboard captures into structured LaTeX.
 
@@ -14,6 +25,43 @@ Petr Belayev p.belayev@innopolis.university
 Andrey Krasnov 
 a.krasnov@innopolis.university 
 Askar Kadyrgulov a.kadyrgulov@innopolis.university
+
+---
+
+Here's the updated deployment section for your README.md file with the specific links:
+
+---
+
+## 🚀 Deployment
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Quick Start
+1. Navigate to the deployment directory:
+   ```bash
+   cd code/deployment
+   ```
+
+2. Start the services using Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. The services will be available at:
+   - **Web Application**: http://localhost:3000
+   - **API Server**: http://localhost:8000/docs#/
+
+### Stopping the Services
+To stop the deployed services:
+```bash
+docker-compose down
+```
+
+---
+
+The web application will be accessible at `http://localhost:3000` and the API server at `http://localhost:8000/docs#/`. Users can access the main interface through the web application URL.
 
 ---
 
