@@ -6,7 +6,7 @@ from PIL import Image
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-DATASET_ROOT = ROOT / "datasets"
+DATASET_ROOT = ROOT / "datasets" / "im2latex"
 OUTPUT_PATH = ROOT / "datasets" / "im2latex_prepared.json"
 
 FORMULA_FILE = DATASET_ROOT / "im2latex_formulas.lst"

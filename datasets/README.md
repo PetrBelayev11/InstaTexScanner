@@ -1,4 +1,4 @@
-If you want to retrain model this is a little instruction about how to setup database.
+If you want to retrain model this is a little instruction about how to setup dataset.
 
 # Dataset Setup Guide
 
