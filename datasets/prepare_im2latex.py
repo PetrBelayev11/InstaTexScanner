@@ -5,8 +5,8 @@ from pathlib import Path
 from PIL import Image
 import sys
 
-ROOT = Path(__file__).resolve().parent.parent.parent
-DATASET_ROOT = ROOT / "datasets" / "im2latex_raw"
+ROOT = Path(__file__).resolve().parent.parent
+DATASET_ROOT = ROOT / "datasets"
 OUTPUT_PATH = ROOT / "datasets" / "im2latex_prepared.json"
 
 FORMULA_FILE = DATASET_ROOT / "im2latex_formulas.lst"
@@ -17,7 +17,7 @@ IMG_ROOT = DATASET_ROOT / "formula_images"
 
 
 def load_formulas():
-    with open(FORMULA_FILE, "r", encoding="utf-8") as f:
+    with open(FORMULA_FILE, "r", encoding="latin-1") as f:
         formulas = [line.strip() for line in f]
     print(f"Loaded {len(formulas)} formulas")
     return formulas
@@ -40,10 +40,6 @@ def load_split(lst_path, formulas):
 
 
 def main():
-    if not DATASET_ROOT.exists():
-        print("Dataset folder not found. Expected:", DATASET_ROOT)
-        sys.exit(1)
-
     formulas = load_formulas()
 
     dataset = {

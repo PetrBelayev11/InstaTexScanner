@@ -29,3 +29,5 @@ Thumbs.db
 # dataset
 emnist_data
 EMNIST
+im2latex
+im2latex_prepared.json
