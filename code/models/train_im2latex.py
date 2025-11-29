@@ -23,17 +23,17 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 # Import modules directly, avoiding conflict with stdlib 'code'
 import importlib.util
-spec = importlib.util.spec_from_file_location("model_im2markup", "code/models/model_im2markup.py")
+spec = importlib.util.spec_from_file_location("model_im2markup", "model_im2markup.py")
 model_im2markup = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(model_im2markup)
 Im2Latex = model_im2markup.Im2Latex
 
-spec = importlib.util.spec_from_file_location("preprocess", "code/models/preprocess.py")
+spec = importlib.util.spec_from_file_location("preprocess", "preprocess.py")
 preprocess = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(preprocess)
 preprocess_for_model = preprocess.preprocess_for_model
 
-spec = importlib.util.spec_from_file_location("vocab", "code/vocab.py")
+spec = importlib.util.spec_from_file_location("vocab", "vocab.py")
 vocab_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(vocab_module)
 build_vocab = vocab_module.build_vocab
@@ -64,40 +64,42 @@ class Im2LatexDataset(Dataset):
                 img_path = item['img_path']
                 try:
                     img = preprocess_for_model(img_path)
+                    if img.shape != (128, 512):
+                        print(f"⚠ Warning: Image {img_path} has shape {img.shape}, expected (128, 512)")
                     img_tensor = torch.tensor(img, dtype=torch.float32).unsqueeze(0)
                     self._preloaded_images[img_path] = img_tensor
                 except Exception as e:
                     if idx < 10:
                         print(f"\nError loading {img_path}: {e}")
-                    self._preloaded_images[img_path] = torch.zeros(1, 64, 256, dtype=torch.float32)
-            print(f"✓ Loaded {len(self._preloaded_images)} images into memory ({len(self._preloaded_images) * 65 / 1024:.2f} MB)")
+                    self._preloaded_images[img_path] = torch.zeros(1, 128, 512, dtype=torch.float32)
+            print(f"✓ Loaded {len(self._preloaded_images)} images into memory")
     
     def __len__(self):
         return len(self.data)
-    
+
     def __getitem__(self, idx):
         item = self.data[idx]
         img_path = item['img_path']
         latex = item['latex']
         
-        # Preprocess image (with preloading or caching)
+        # Preprocess image
         if self._preloaded_images is not None:
-            # Image already in memory - very fast!
-            img_tensor = self._preloaded_images.get(img_path, torch.zeros(1, 64, 256, dtype=torch.float32))
+            img_tensor = self._preloaded_images.get(img_path, torch.zeros(1, 128, 512, dtype=torch.float32))
         elif self.cache_images and img_path in self._image_cache:
             img_tensor = self._image_cache[img_path]
         else:
-            # Load from disk (slow)
             try:
                 img = preprocess_for_model(img_path)
-                img_tensor = torch.tensor(img, dtype=torch.float32).unsqueeze(0)  # 1 x H x W
+                # VERIFY SIZE
+                if img.shape != (128, 512):
+                    print(f"⚠ Size mismatch: {img_path} has shape {img.shape}")
+                img_tensor = torch.tensor(img, dtype=torch.float32).unsqueeze(0)
                 if self.cache_images:
                     self._image_cache[img_path] = img_tensor
             except Exception as e:
-                if idx < 10:  # Show only first 10 errors
+                if idx < 10:
                     print(f"Error loading image {img_path}: {e}")
-                # Return zero image as fallback
-                img_tensor = torch.zeros(1, 64, 256, dtype=torch.float32)
+                img_tensor = torch.zeros(1, 128, 512, dtype=torch.float32)
         
         # Convert LaTeX to token sequence (optimized)
         tokens = [self.sos_token]
@@ -138,7 +140,9 @@ def train_epoch(model, dataloader, criterion, optimizer, device, epoch):
     # Use non_blocking to speed up transfer to GPU
     non_blocking = torch.cuda.is_available()
     
-    pbar = tqdm(dataloader, desc=f"Epoch {epoch}", ncols=120, mininterval=0.5, file=sys.stdout, dynamic_ncols=False)
+    # Cleaner progress bar with minimal info
+    pbar = tqdm(dataloader, desc=f"Epoch {epoch}", ncols=80, file=sys.stdout)
+    
     for imgs, input_seqs, targets in pbar:
         # Asynchronous transfer to GPU for acceleration
         imgs = imgs.to(device, non_blocking=non_blocking)
@@ -162,23 +166,22 @@ def train_epoch(model, dataloader, criterion, optimizer, device, epoch):
         
         # Backward pass
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
         optimizer.step()
         
         total_loss += loss.item()
         num_batches += 1
         
-        # Show GPU usage
-        if torch.cuda.is_available() and num_batches % 10 == 0:
+        # Update progress bar with cleaner formatting
+        avg_loss = total_loss / num_batches
+        postfix = {'loss': f'{loss.item():.3f}', 'avg': f'{avg_loss:.3f}'}
+        
+        # Add GPU info less frequently to reduce clutter
+        if torch.cuda.is_available() and num_batches % 20 == 0:
             gpu_memory = torch.cuda.memory_allocated(0) / 1024**3
-            gpu_memory_max = torch.cuda.max_memory_allocated(0) / 1024**3
-            pbar.set_postfix({
-                'loss': f'{loss.item():.4f}', 
-                'avg': f'{total_loss/num_batches:.4f}',
-                'GPU': f'{gpu_memory:.2f}GB'
-            })
-        elif num_batches % 5 == 0:
-            pbar.set_postfix({'loss': f'{loss.item():.4f}', 'avg': f'{total_loss/num_batches:.4f}'})
+            postfix['GPU'] = f'{gpu_memory:.1f}GB'
+        
+        pbar.set_postfix(postfix)
     
     avg_loss = total_loss / num_batches if num_batches > 0 else 0.0
     return avg_loss
@@ -212,11 +215,11 @@ def validate(model, dataloader, criterion, device):
 
 def main():
     # Training parameters
-    json_path = Path("datasets/im2latex_prepared.json")
-    batch_size = 64  # Optimal for GTX 1080 (8GB)
+    json_path = Path("../../datasets/im2latex_prepared.json")
+    batch_size = 16  # Optimal for GTX 1080 (8GB)
     # Increase number of epochs for model fine-tuning
-    num_epochs = 60
-    learning_rate = 1e-3
+    num_epochs = 30
+    learning_rate = 1e-4
     max_len = 256
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -255,10 +258,9 @@ def main():
         available_ram_gb = 16  # Assume 16GB if psutil is not available
     total_samples = len(train_data) + (len(val_data) if val_data else 0)
     # Approximately 64*256*4 bytes per image = 65KB per image
-    estimated_ram_gb = (total_samples * 65 * 1024) / 1024**3
-    
+    estimated_ram_gb = (total_samples * 65 * 1024 * 4) / 1024**3  # 4x larger images
     print(f"\nAvailable RAM: {available_ram_gb:.2f} GB")
-    print(f"Estimated RAM for preload: {estimated_ram_gb:.2f} GB")
+    print(f"Estimated RAM for preload: {estimated_ram_gb:.2f} GB (4x larger due to 128x512 images)")
     
     # Automatic strategy selection
     if available_ram_gb > estimated_ram_gb * 1.5:  # Need 1.5x margin
@@ -358,7 +360,7 @@ def main():
     # Directory for saving models
     model_dir = Path("models")
     model_dir.mkdir(exist_ok=True)
-    
+
     # Training
     print("\nStarting training...")
     best_val_loss = float('inf')
